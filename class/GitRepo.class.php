@@ -13,10 +13,14 @@ class GitRepo
 
     public function switchBranch($branche)
     {
-    	preg_match('/(?<keyword>remotes\/)*(?<branche>.*)/', $branche, $matchs);
-    	$result = $this->execGitCommand('checkout '.$matchs['branche']);
+    	preg_match('/(?<keyword>remotes\/)*(?<remote>[\w\d-]+)*\/?(?<branche>.*)/', $branche, $matchs);
+    	if($matchs['remote'] == 'origin')
+   		 	$result = $this->execGitCommand('checkout -b '.$matchs['branche'].' origin/'.$matchs['branche']);
+    	else
+    		$result = $this->execGitCommand('checkout '.$matchs['branche']);
     	if($result['return'] == self::COD_SUCCESS)
     	{
+    		$this->execGitCommand('git pull origin '.$matchs['branche']);
         	return implode("\n", $result['output']);
     	}else 
     		throw new Exception($result['erro'], $result['return']);

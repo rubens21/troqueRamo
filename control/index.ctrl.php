@@ -1,5 +1,4 @@
 <?php
-require 'config.php';
 require 'class/GitRepo.class.php';
 define('PATH_REPO', '');
 
