@@ -13,14 +13,14 @@ class GitRepo
 
     public function switchBranch($branche)
     {
-    	preg_match('/(?<keyword>remotes\/)*(?<remote>[\w\d-]+)*\/?(?<branche>.*)/', $branche, $matchs);
-    	if($matchs['remote'] == 'origin')
-   		 	$result = $this->execGitCommand('checkout -b '.$matchs['branche'].' origin/'.$matchs['branche']);
+    	preg_match_all('/(?<data>[^\/]+)/', $branche, $matchs);
+    	if(count($matchs['data']) == 3)
+   		 $result = $this->execGitCommand('git checkout -b '.$matchs['data'][2].' origin/'.$matchs['data'][2]);
     	else
-    		$result = $this->execGitCommand('checkout '.$matchs['branche']);
+    		$result = $this->execGitCommand('git checkout '.$matchs['data'][0]);
     	if($result['return'] == self::COD_SUCCESS)
     	{
-    		$this->execGitCommand('git pull origin '.$matchs['branche']);
+    		$this->execGitCommand('git pull origin '.$matchs['data'][2]);
         	return implode("\n", $result['output']);
     	}else 
     		throw new Exception($result['erro'], $result['return']);
@@ -29,7 +29,7 @@ class GitRepo
     
     public function getLocalBranches()
     {
-       $result = $this->execGitCommand('branch -a');
+       $result = $this->execGitCommand('git branch -a');
        if($result['return'] == self::COD_SUCCESS)
         {
         	$branches = array();
@@ -48,7 +48,7 @@ class GitRepo
     
     private function execGitCommand($command)
     {
-    	$base = 'git -C '.$this->root_path.' ';
+    	$base = 'cd '.$this->root_path.'; ';
     	$full_command = $base.$command.' 2>&1';
     	exec($full_command, $output, $return_var);
     	if($return_var == self::COD_SUCCESS)
