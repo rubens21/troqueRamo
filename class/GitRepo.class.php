@@ -14,20 +14,21 @@ class GitRepo
     public function switchBranch($branche)
     {
     	preg_match_all('/(?<data>[^\/]+)/', $branche, $matchs);
-    	if(count($matchs['data']) == 3)
-   		 $result = $this->execGitCommand('git checkout -b '.$matchs['data'][2].' origin/'.$matchs['data'][2]);
+		if(count($matchs['data']) == 3)
+   		 	$result = $this->execGitCommand('git checkout '.$matchs['data'][2]);
     	else
     		$result = $this->execGitCommand('git checkout '.$matchs['data'][0]);
+		//print_r($matchs);exit;
     	if($result['return'] == self::COD_SUCCESS)
     	{
-    		$this->execGitCommand('git pull origin '.$matchs['data'][2]);
-        	return implode("\n", $result['output']);
+    		$this->execGitCommand('git pull origin '.$matchs[1][0]);
+        	return implode("<br>", $result['output']);
     	}else 
     		throw new Exception($result['erro'], $result['return']);
     	
     }
-    
-    public function getLocalBranches()
+
+	private function getLocalBranches()
     {
        $result = $this->execGitCommand('git branch -a');
        if($result['return'] == self::COD_SUCCESS)
@@ -56,5 +57,14 @@ class GitRepo
         else
     	   return array('erro' => implode("\n", $output), 'return' => $return_var);
     }
+
+	public function returnOption(){
+		$resposta = "";
+		foreach($this->getLocalBranches() as $index => $item){
+			if(!preg_match('/(->)/',$item))
+				$resposta .= '<option value="'.$item.'" '.($index=='*'?'selected="selected"':null).'>'.$item.'</option>';
+		}
+		return $resposta;
+	}
 }
 

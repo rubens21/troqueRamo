@@ -1,31 +1,17 @@
 <?php
-require 'class/GitRepo.class.php';
+	error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+	require '../class/GitRepo.class.php';
 
-if(isset($_POST['repo'])){
-	define('PATH_REPO', "/var/www/".$_POST['repo']);
-}else{
-	define('PATH_REPO', "/var/www/feijo/DevRepo-V3.2");
-}
+	$devel = $_POST['devel'];
+	$path = "/var/www/TEST/{$devel}/buscafacil";
+	$Repo = new GitRepo($path);
 
-switch ($_REQUEST['action']) {
-	case 'Trocar':
-		try{
-			$Repo = new GitRepo(PATH_REPO);
-			$resposta = $Repo->switchBranch($_POST['ramo']);
-		}catch (Exception $e){
-			$resposta =  $e->getMessage();
-		}
-	default :
-		
-		try{
-			$Repo = new GitRepo(PATH_REPO);
-			foreach($Repo->getLocalBranches() as $index => $item){
-				$list_options .= '<option value="'.$item.'" '.($index=='*'?'selected="selected"':null).'>'.$item.'</option>';
-			}
-		}catch (Exception $e){
-			$resposta =  $e->getMessage();
-		}
-	break;
-}
+	if(method_exists($Repo,$_POST['action'])){
+		$param = isset($_POST['param'])?$_POST['param']:null;
+		$response = $Repo->$_POST['action']($param);
+	}
+
+	exit(json_encode($response));
 
 
